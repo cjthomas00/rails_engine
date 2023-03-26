@@ -1,2 +1,0 @@
-class Cutsomer < ApplicationRecord
-end

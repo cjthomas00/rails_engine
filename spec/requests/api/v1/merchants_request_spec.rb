@@ -32,11 +32,10 @@ describe "Merchants API" do
     merchant = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to be_successful
-
-    expect(merchant1.id).to be_an(Integer)
-    expect(merchant1.id).to eq(merchant1.id)
-    expect(merchant1.name).to be_an(String)
-    expect(merchant1.name).to eq(merchant1.name)
+    expect(merchant[:data][:id]).to be_an(String)
+    expect(merchant[:data][:id]).to eq(merchant1.id.to_s)
+    expect(merchant[:data][:attributes][:name]).to be_an(String)
+    expect(merchant[:data][:attributes][:name]).to eq(merchant1.name)
   end
 
   it "can get all items for a given merchant ID " do

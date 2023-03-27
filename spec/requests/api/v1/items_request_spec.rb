@@ -33,21 +33,22 @@ describe "Items API" do
 
   it "gets one item" do 
     merchant = create(:merchant)
-    item = create(:item, merchant_id: merchant.id)
+    item1 = create(:item, merchant_id: merchant.id)
 
-    get "/api/v1/items/#{item.id}"
+    get "/api/v1/items/#{item1.id}"
 
+    item = JSON.parse(response.body, symbolize_names: true)
     expect(response).to be_successful
     
-    expect(item.id).to be_an(Integer)
-    expect(item.id).to eq(item.id)
-    expect(item.name).to be_an(String)
-    expect(item.name).to eq(item.name)
-    expect(item.description).to be_an(String)
-    expect(item.description).to eq(item.description)
-    expect(item.unit_price).to be_an(Float)
-    expect(item.unit_price).to eq(item.unit_price)
-    expect(item.merchant_id).to be_an(Integer)
-    expect(item.merchant_id).to eq(item.merchant_id)
+    expect(item[:data][:id]).to be_an(String)
+    expect(item[:data][:id]).to eq(item1.id.to_s)
+    expect(item[:data][:attributes][:name]).to be_an(String)
+    expect(item[:data][:attributes][:name]).to eq(item1.name)
+    expect(item[:data][:attributes][:description]).to be_an(String)
+    expect(item[:data][:attributes][:description]).to eq(item1.description)
+    expect(item[:data][:attributes][:unit_price]).to be_an(Float)
+    expect(item[:data][:attributes][:unit_price]).to eq(item1.unit_price)
+    expect(item[:data][:attributes][:merchant_id]).to be_an(Integer)
+    expect(item[:data][:attributes][:merchant_id]).to eq(item1.merchant_id)
   end
 end

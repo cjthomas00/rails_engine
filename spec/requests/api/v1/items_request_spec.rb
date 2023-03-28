@@ -52,6 +52,15 @@ describe "Items API" do
     expect(item[:data][:attributes][:merchant_id]).to eq(item1.merchant_id)
   end
 
+  it "gives an error if an item doesn't exist" do
+    merchant = create(:merchant)
+    item1 = create(:item, merchant_id: merchant.id)
+
+    get "/api/v1/items/#{item1.id}"
+
+    item = JSON.parse(response.body, symbolize_names: true)
+  end
+
   it "can create a new item" do
     merchant = create(:merchant)
     item_params = ({

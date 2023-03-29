@@ -3,6 +3,8 @@ require 'rails_helper'
 RSpec.describe Merchant, type: :model do
   describe "relationships" do
     it { should have_many :items }
+    it { should have_many :invoices }
+    it { should have_many(:invoice_items).through(:invoices) }
   end
 
   describe "validations" do
@@ -19,6 +21,7 @@ RSpec.describe Merchant, type: :model do
     expect(Merchant.search_by_name("le")).to eq([store2, store1])
     expect(Merchant.search_by_name("J")).to eq([store3])
     expect(Merchant.search_by_name("J")).to_not eq([store1, store2])
+    expect(Merchant.search_by_name("zoo")).to eq([])
     end
   end
 end

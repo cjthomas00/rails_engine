@@ -1,6 +1,5 @@
 class Api::V1::Merchant::SearchController < ApplicationController
   def index
-    
-    # require 'pry'; binding.pry
+    render json: MerchantSerializer.new(Merchant.search_by_name(params[:name]))
   end
 end

@@ -17,6 +17,8 @@ RSpec.describe Merchant, type: :model do
 
     expect(Merchant.search_by_name("store")).to eq([store2, store3, store1])
     expect(Merchant.search_by_name("le")).to eq([store2, store1])
+    expect(Merchant.search_by_name("J")).to eq([store3])
+    expect(Merchant.search_by_name("J")).to_not eq([store1, store2])
     end
   end
 end

@@ -52,13 +52,17 @@ describe "Items API" do
     expect(parsed_data[:data][:attributes][:merchant_id]).to eq(item1.merchant_id)
   end
 
-  xit "gives an error if an item doesn't exist" do
+  it "gives an error if an item doesn't exist" do
     merchant = create(:merchant)
     item1 = create(:item, merchant_id: merchant.id)
 
-    get "/api/v1/items/#{item1.id}"
+    get "/api/v1/items/406653538451"
 
-    item = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(404)
+    expect(parsed_data[:error]).to be_an(String)
+    expect(parsed_data[:error]).to eq("Couldn't find Item with 'id'=406653538451")
   end
 
   it "can create a new item" do
@@ -81,19 +85,92 @@ describe "Items API" do
     expect(created_item.merchant_id).to eq(item_params[:merchant_id])
   end
 
+  it "won't create an item if field(s) are empty" do
+    merchant = create(:merchant)
+    item_params = ({
+    name:"", 
+    description: "", 
+    unit_price: 13.69, 
+    merchant_id: merchant.id})
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+    created_item = Item.last
+    
+    expect(response).to have_http_status(400)
+    expect(response).to have_http_status(:bad_request)
+
+    errors = JSON.parse(response.body, symbolize_names: true)
+    expect(errors[:errors]).to eq("Invalid Item Creation, 1 or more fields is missing or incorrect")
+  end
+
+  it "won't create an item if field(s) are incorrect data types" do
+    merchant = create(:merchant)
+    item_params = ({ 
+    name: 0,
+    description: "Better than sliced bread.", 
+    unit_price: "kkjhg", 
+    merchant_id: merchant.id})
+
+    headers = {"CONTENT_TYPE" => "application/json"}
+    post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
+    created_item = Item.last
+    
+    expect(response).to have_http_status(400)
+    expect(response).to have_http_status(:bad_request)
+
+    errors = JSON.parse(response.body, symbolize_names: true)
+    expect(errors[:errors]).to eq("Invalid Item Creation, 1 or more fields is missing or incorrect")
+  end
+
   it "can update an item" do
     id = create(:item).id
     previous_name = Item.last.name
     item_params = { name: "lamp shade" }
     headers = {"CONTENT_TYPE" => "application/json"}
 
-  
     patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
     item = Item.find_by(id: id)
 
     expect(response).to be_successful
     expect(item.name).to_not eq(previous_name)
     expect(item.name).to eq("lamp shade")
+  end
+
+  it "won't update an item with missing attributes" do
+    id = create(:item).id
+    previous_name = Item.last.name
+    item_params = { name: "" }
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+    item = Item.find_by(id: id)
+
+    expect(item.name).to eq(previous_name)
+    expect(item.name).to_not eq("")
+    expect(response).to have_http_status(400)
+    expect(response).to have_http_status(:bad_request)
+
+    errors = JSON.parse(response.body, symbolize_names: true)
+    expect(errors[:errors]).to eq("Invalid Update, 1 or more fields is missing or incorrect")
+  end
+
+  it "won't update an item with incorrect attributes" do
+    id = create(:item).id
+    previous_price = Item.last.unit_price
+    item_params = { unit_price: "ufuf" }
+    headers = {"CONTENT_TYPE" => "application/json"}
+
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+    item = Item.find_by(id: id)
+
+    expect(item.unit_price).to eq(previous_price)
+    expect(item.unit_price).to_not eq("ufuf")
+    expect(response).to have_http_status(400)
+    expect(response).to have_http_status(:bad_request)
+
+    errors = JSON.parse(response.body, symbolize_names: true)
+    expect(errors[:errors]).to eq("Invalid Update, 1 or more fields is missing or incorrect")
   end
 
   it "can destroy an item" do

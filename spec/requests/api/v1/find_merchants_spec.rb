@@ -10,6 +10,7 @@ RSpec.describe "Find_merchants" do
       get "/api/v1/merchants/find_all?name=mart"
 
       expect(response).to be_successful
+      expect(response).to have_http_status(200)
       parsed_data = JSON.parse(response.body, symbolize_names: true)
       
       expect(parsed_data[:data]).to be_a(Array)

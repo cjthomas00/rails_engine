@@ -8,11 +8,11 @@ describe "Merchants API" do
 
     expect(response).to be_successful
 
-    merchants = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
     
-    expect(merchants[:data].count).to eq(3)
-
-    merchants[:data].each do |merchant|
+    expect(parsed_data[:data].size).to eq(3)
+    expect(parsed_data[:data]).to be_an(Array)
+    parsed_data[:data].each do |merchant|
       expect(merchant).to have_key(:id)
       expect(merchant[:id]).to be_an(String)
 
@@ -29,13 +29,37 @@ describe "Merchants API" do
 
     get "/api/v1/merchants/#{merchant1.id}"
 
-    merchant = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to be_successful
-    expect(merchant[:data][:id]).to be_an(String)
-    expect(merchant[:data][:id]).to eq(merchant1.id.to_s)
-    expect(merchant[:data][:attributes][:name]).to be_an(String)
-    expect(merchant[:data][:attributes][:name]).to eq(merchant1.name)
+    expect(parsed_data[:data][:id]).to be_an(String)
+    expect(parsed_data[:data][:id]).to eq(merchant1.id.to_s)
+    expect(parsed_data[:data][:attributes][:name]).to be_an(String)
+    expect(parsed_data[:data][:attributes][:name]).to eq(merchant1.name)
+  end
+
+  it "can send an error message for a non-existent merchant" do
+    merchant1 = create(:merchant)
+
+    get "/api/v1/merchants/998799558"
+
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(404)
+    expect(parsed_data[:error]).to be_an(String)
+    expect(parsed_data[:error]).to eq("Couldn't find Merchant with 'id'=998799558")
+  end
+
+  it "can send an error message for a non-existent merchant" do
+    merchant1 = create(:merchant)
+
+    get "/api/v1/merchants/string"
+
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(404)
+    expect(parsed_data[:error]).to be_an(String)
+    expect(parsed_data[:error]).to eq("Couldn't find Merchant with 'id'=string")
   end
 
   it "can get all items for a given merchant ID " do
@@ -43,13 +67,14 @@ describe "Merchants API" do
     create_list(:item, 25, merchant_id: id)
     get "/api/v1/merchants/#{id}/items"
 
-    items = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
     
     expect(response).to be_successful
     
-    expect(items[:data].count).to eq(25)
+    expect(parsed_data[:data].size).to eq(25)
+    expect(parsed_data[:data]).to be_an(Array)
 
-    items[:data].each do |item|
+    parsed_data[:data].each do |item|
       expect(item).to have_key(:id)
       expect(item[:id]).to be_an(String)
       
@@ -65,5 +90,17 @@ describe "Merchants API" do
       expect(item[:attributes]).to have_key(:merchant_id)
       expect(item[:attributes][:merchant_id]).to be_an(Integer)
     end
+  end
+
+  it "returns a 404 code if the merchant isn't found" do
+    id = create(:merchant).id
+    create_list(:item, 25, merchant_id: id)
+    
+    get "/api/v1/merchants/100000000/items"
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+
+    expect(response).to have_http_status(404)
+    expect(parsed_data[:error]).to be_an(String)
+    expect(parsed_data[:error]).to eq("Couldn't find Merchant with 'id'=100000000")
   end
 end

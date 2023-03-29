@@ -73,7 +73,7 @@ describe "Items API" do
     unit_price: 96.37, 
     merchant_id: merchant.id})
 
-    headers = {"CONTENT_TYPE" => "application/json"}
+    headers = { "CONTENT_TYPE" => "application/json" }
     post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
     created_item = Item.last
 
@@ -112,7 +112,7 @@ describe "Items API" do
     unit_price: "kkjhg", 
     merchant_id: merchant.id})
 
-    headers = {"CONTENT_TYPE" => "application/json"}
+    headers = { "CONTENT_TYPE" => "application/json" }
     post "/api/v1/items", headers: headers, params: JSON.generate(item: item_params)
     created_item = Item.last
     
@@ -127,9 +127,9 @@ describe "Items API" do
     id = create(:item).id
     previous_name = Item.last.name
     item_params = { name: "lamp shade" }
-    headers = {"CONTENT_TYPE" => "application/json"}
+    headers = { "CONTENT_TYPE" => "application/json" }
 
-    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({ item: item_params })
     item = Item.find_by(id: id)
 
     expect(response).to be_successful
@@ -141,9 +141,9 @@ describe "Items API" do
     id = create(:item).id
     previous_name = Item.last.name
     item_params = { name: "" }
-    headers = {"CONTENT_TYPE" => "application/json"}
+    headers = { "CONTENT_TYPE" => "application/json" }
 
-    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({ item: item_params })
     item = Item.find_by(id: id)
 
     expect(item.name).to eq(previous_name)
@@ -159,9 +159,9 @@ describe "Items API" do
     id = create(:item).id
     previous_price = Item.last.unit_price
     item_params = { unit_price: "ufuf" }
-    headers = {"CONTENT_TYPE" => "application/json"}
+    headers = { "CONTENT_TYPE" => "application/json" }
 
-    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({item: item_params})
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({ item: item_params })
     item = Item.find_by(id: id)
 
     expect(item.unit_price).to eq(previous_price)

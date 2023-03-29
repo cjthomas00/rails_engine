@@ -174,15 +174,32 @@ describe "Items API" do
   end
 
   it "can destroy an item" do
-    item = create(:item)
+    merchant = create(:merchant)
+		customer = create(:customer)
+    
+    item_1 = create(:item, merchant_id: merchant.id)
+    item_2 = create(:item, merchant_id: merchant.id)
 
-    expect(Item.count).to eq(1)
+    invoice_1 = create(:invoice, merchant_id: merchant.id, customer_id: customer.id)
+		invoice_2 = create(:invoice, merchant_id: merchant.id, customer_id: customer.id)
 
-    delete "/api/v1/items/#{item.id}"
+		invoice_item_1 = create(:invoice_item, invoice_id: invoice_1.id, item_id: item_1.id, quantity: 2)
+		invoice_item_2 = create(:invoice_item, invoice_id: invoice_2.id, item_id: item_1.id, quantity: 4)
+		invoice_item_3 = create(:invoice_item, invoice_id: invoice_1.id, item_id: item_2.id, quantity: 3)
+				
+		expect(Item.count).to eq(2)
+		expect(Invoice.count).to eq(2)
+		expect(InvoiceItem.count).to eq(3)
+		expect(Merchant.count).to eq(1)
+
+    delete "/api/v1/items/#{item_1.id}"
 
     expect(response).to be_successful
-    expect(Item.count).to eq(0)
-    expect{Item.find(item.id)}.to raise_error(ActiveRecord::RecordNotFound)
+    expect(response).to have_http_status(204)
+    expect(Item.count).to eq(1)
+    expect{Item.find(item_1.id)}.to raise_error(ActiveRecord::RecordNotFound)
+    expect(Invoice.count).to eq(1)
+    expect(InvoiceItem.count).to eq(1)
   end
 
   it "can get an items merchant" do

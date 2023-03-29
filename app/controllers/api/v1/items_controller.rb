@@ -32,7 +32,16 @@ class Api::V1::ItemsController < ApplicationController
   end
 
   def destroy
-    render json: Item.delete(params[:id])
+    item = Item.find(params[:id])
+    item.invoices.each do |invoice|
+      if invoice.has_multiple_items?
+        invoice_item = invoice.invoice_items.find_by(item_id: item.id)
+        invoice_item.destroy
+      else
+        invoice.destroy
+      end
+    end
+    render json: Item.delete(params[:id]), status: :no_content
   end
 
   private

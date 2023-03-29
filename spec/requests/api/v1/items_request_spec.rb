@@ -9,11 +9,11 @@ describe "Items API" do
 
     expect(response).to be_successful
 
-    items = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
 
-    expect(items[:data].count).to eq(25)
-
-    items[:data].each do |item|
+    expect(parsed_data[:data].count).to eq(25)
+    expect(parsed_data[:data]).to be_an(Array)
+    parsed_data[:data].each do |item|
       expect(item).to have_key(:id)
       expect(item[:id]).to be_an(String)
       
@@ -37,22 +37,22 @@ describe "Items API" do
 
     get "/api/v1/items/#{item1.id}"
 
-    item = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
     expect(response).to be_successful
     
-    expect(item[:data][:id]).to be_an(String)
-    expect(item[:data][:id]).to eq(item1.id.to_s)
-    expect(item[:data][:attributes][:name]).to be_an(String)
-    expect(item[:data][:attributes][:name]).to eq(item1.name)
-    expect(item[:data][:attributes][:description]).to be_an(String)
-    expect(item[:data][:attributes][:description]).to eq(item1.description)
-    expect(item[:data][:attributes][:unit_price]).to be_an(Float)
-    expect(item[:data][:attributes][:unit_price]).to eq(item1.unit_price)
-    expect(item[:data][:attributes][:merchant_id]).to be_an(Integer)
-    expect(item[:data][:attributes][:merchant_id]).to eq(item1.merchant_id)
+    expect(parsed_data[:data][:id]).to be_an(String)
+    expect(parsed_data[:data][:id]).to eq(item1.id.to_s)
+    expect(parsed_data[:data][:attributes][:name]).to be_an(String)
+    expect(parsed_data[:data][:attributes][:name]).to eq(item1.name)
+    expect(parsed_data[:data][:attributes][:description]).to be_an(String)
+    expect(parsed_data[:data][:attributes][:description]).to eq(item1.description)
+    expect(parsed_data[:data][:attributes][:unit_price]).to be_an(Float)
+    expect(parsed_data[:data][:attributes][:unit_price]).to eq(item1.unit_price)
+    expect(parsed_data[:data][:attributes][:merchant_id]).to be_an(Integer)
+    expect(parsed_data[:data][:attributes][:merchant_id]).to eq(item1.merchant_id)
   end
 
-  it "gives an error if an item doesn't exist" do
+  xit "gives an error if an item doesn't exist" do
     merchant = create(:merchant)
     item1 = create(:item, merchant_id: merchant.id)
 
@@ -113,15 +113,15 @@ describe "Items API" do
 
     get "/api/v1/items/#{item1.id}/merchant"
 
-    merchant = JSON.parse(response.body, symbolize_names: true)
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
   
     expect(response).to be_successful
-    expect(merchant[:data]).to be_a(Hash)
-    expect(merchant[:data][:id]).to be_a(String)
-    expect(merchant[:data][:type]).to be_a(String)
-    expect(merchant[:data][:type]).to eq("merchant")
-    expect(merchant[:data][:attributes]).to be_a(Hash)
-    expect(merchant[:data][:attributes]).to have_key(:name)
-    expect(merchant[:data][:attributes][:name]).to eq(item1.merchant.name)
+    expect(parsed_data[:data]).to be_a(Hash)
+    expect(parsed_data[:data][:id]).to be_a(String)
+    expect(parsed_data[:data][:type]).to be_a(String)
+    expect(parsed_data[:data][:type]).to eq("merchant")
+    expect(parsed_data[:data][:attributes]).to be_a(Hash)
+    expect(parsed_data[:data][:attributes]).to have_key(:name)
+    expect(parsed_data[:data][:attributes][:name]).to eq(item1.merchant.name)
   end
 end

@@ -26,17 +26,19 @@ RSpec.describe "SearchItems", type: :request do
       expect(parsed_data[:data][:attributes][:name]).to_not eq("Mermaid tail socks")
     end
 
-    it "returns an error message if no records are found" do
+    it "returns an empty hash if no records are found" do
       create(:item, name: "Zebra striped socks")
       create(:item, name: "Brown socks")
       create(:item, name: "Mermaid tail socks")
 
       get "/api/v1/items/find?name=house"
   
-      expect(response).to_not be_successful
-      expect(response).to have_http_status(400)
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+
       parsed_data = JSON.parse(response.body, symbolize_names: true)
-      expect(parsed_data[:errors]).to eq("Item not found")
+      expect(parsed_data).to be_a(Hash)
+      expect(parsed_data[:data]).to be_empty
     end
 
     it "can return a single item by minimum price" do
@@ -78,17 +80,19 @@ RSpec.describe "SearchItems", type: :request do
       expect(parsed_data[:data][:attributes][:name]).to eq("Mermaid tail socks")
     end
 
-    it "wont find an item if the min and max price are out of range" do
+    it "wont find an item if the min and max price are out of range and return empty hash" do
       create(:item, name: "Zebra striped socks", unit_price: 99.99)
       create(:item, name: "Brown socks", unit_price: 199.99)
       create(:item, name: "Mermaid tail socks", unit_price: 299.99)
 
       get "/api/v1/items/find?min_price=399&max_price=499"
 
-      expect(response).to_not be_successful
-      expect(response).to have_http_status(400)
+      expect(response).to be_successful
+      expect(response).to have_http_status(200)
+      
       parsed_data = JSON.parse(response.body, symbolize_names: true)
-      expect(parsed_data[:errors]).to eq("Item not found")
+      expect(parsed_data).to be_a(Hash)
+      expect(parsed_data[:data]).to be_empty
     end
 
     it "wont return an item if the either price is less than 0" do
@@ -101,14 +105,20 @@ RSpec.describe "SearchItems", type: :request do
       expect(response).to_not be_successful
       expect(response).to have_http_status(400)
       parsed_data = JSON.parse(response.body, symbolize_names: true)
-      expect(parsed_data[:errors]).to eq("Invalid Search Parameters")
+      parsed_data[:errors].each do |error|
+        expect(error[:status]).to eq("400")
+        expect(error[:title]).to eq("Invalid Search Parameters")
+      end
 
       get "/api/v1/items/find?max_price=-1"
 
       expect(response).to_not be_successful
       expect(response).to have_http_status(400)
       parsed_data = JSON.parse(response.body, symbolize_names: true)
-      expect(parsed_data[:errors]).to eq("Invalid Search Parameters")
+      parsed_data[:errors].each do |error|
+        expect(error[:status]).to eq("400")
+        expect(error[:title]).to eq("Invalid Search Parameters")
+      end
     end
 
     it "wont return an item if searched by name and price" do
@@ -118,10 +128,13 @@ RSpec.describe "SearchItems", type: :request do
 
       get "/api/v1/items/find?min_price=299&name=socks"
 
-      expect(response).to_not be_successful
+      
       expect(response).to have_http_status(400)
       parsed_data = JSON.parse(response.body, symbolize_names: true)
-      expect(parsed_data[:errors]).to eq("Invalid Search Parameters")
+      parsed_data[:errors].each do |error|
+        expect(error[:status]).to eq("400") 
+        expect(error[:title]).to eq("Invalid Search Parameters") 
+      end
     end
   end
 end

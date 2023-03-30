@@ -61,8 +61,10 @@ describe "Items API" do
     parsed_data = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to have_http_status(404)
-    expect(parsed_data[:error]).to be_an(String)
-    expect(parsed_data[:error]).to eq("Couldn't find Item with 'id'=406653538451")
+    parsed_data[:errors].each do |error|
+      expect(error[:status]).to eq("404")
+      expect(error[:title]).to eq("Couldn't find Item with 'id'=406653538451")
+    end
   end
 
   it "can create a new item" do
@@ -100,8 +102,11 @@ describe "Items API" do
     expect(response).to have_http_status(400)
     expect(response).to have_http_status(:bad_request)
 
-    errors = JSON.parse(response.body, symbolize_names: true)
-    expect(errors[:errors]).to eq("Invalid Item Creation, 1 or more fields is missing or incorrect")
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+    parsed_data[:errors].each do |error|
+      expect(error[:title]).to eq("Invalid Item Creation, 1 or more fields is missing or incorrect")
+      expect(error[:status]).to eq("400")
+    end
   end
 
   it "won't create an item if field(s) are incorrect data types" do
@@ -119,8 +124,11 @@ describe "Items API" do
     expect(response).to have_http_status(400)
     expect(response).to have_http_status(:bad_request)
 
-    errors = JSON.parse(response.body, symbolize_names: true)
-    expect(errors[:errors]).to eq("Invalid Item Creation, 1 or more fields is missing or incorrect")
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+    parsed_data[:errors].each do |error|
+      expect(error[:title]).to eq("Invalid Item Creation, 1 or more fields is missing or incorrect")
+      expect(error[:status]).to eq("400")
+    end
   end
 
   it "can update an item" do
@@ -151,8 +159,11 @@ describe "Items API" do
     expect(response).to have_http_status(400)
     expect(response).to have_http_status(:bad_request)
 
-    errors = JSON.parse(response.body, symbolize_names: true)
-    expect(errors[:errors]).to eq("Invalid Update, 1 or more fields is missing or incorrect")
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+    parsed_data[:errors].each do |error|
+      expect(error[:title]).to eq("Invalid Update, 1 or more fields is missing or incorrect")
+      expect(error[:status]).to eq("400")
+    end
   end
 
   it "won't update an item with incorrect attributes" do
@@ -161,7 +172,7 @@ describe "Items API" do
     item_params = { unit_price: "ufuf" }
     headers = { "CONTENT_TYPE" => "application/json" }
 
-    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate({ item: item_params })
+    patch "/api/v1/items/#{id}", headers: headers, params: JSON.generate( { item: item_params } )
     item = Item.find_by(id: id)
 
     expect(item.unit_price).to eq(previous_price)
@@ -169,8 +180,11 @@ describe "Items API" do
     expect(response).to have_http_status(400)
     expect(response).to have_http_status(:bad_request)
 
-    errors = JSON.parse(response.body, symbolize_names: true)
-    expect(errors[:errors]).to eq("Invalid Update, 1 or more fields is missing or incorrect")
+    parsed_data = JSON.parse(response.body, symbolize_names: true)
+    parsed_data[:errors].each do |error|
+      expect(error[:title]).to eq("Invalid Update, 1 or more fields is missing or incorrect")
+      expect(error[:status]).to eq("400")
+    end
   end
 
   it "can destroy an item" do

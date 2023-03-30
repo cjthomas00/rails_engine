@@ -30,7 +30,7 @@ RSpec.describe Item, type: :model do
       item3 = create(:item, name: "Mermaid tail socks", unit_price: 299.99)
 
       expect(Item.search_by_price(199.98, 250.00)).to eq(item2)
-      expect(Item.search_by_price(299.98, 375.00)).to eq(item3)
+      expect(Item.search_by_price(299.98, nil)).to eq(item3)
       expect(Item.search_by_price(99.98, 150.00)).to eq(item1)
       expect(Item.search_by_price(399.98, 500)).to eq(nil)
     end
@@ -42,7 +42,7 @@ RSpec.describe Item, type: :model do
 
       expect(Item.search_by_price(25.00, 199.98)).to eq(item1)
       expect(Item.search_by_price(150.00, 299.98)).to eq(item2)
-      expect(Item.search_by_price(25.00, 99.98)).to eq(nil)
+      expect(Item.search_by_price(nil, 99.98)).to eq(nil)
       expect(Item.search_by_price(250.00, 399.98)).to eq(item3)
     end
   end

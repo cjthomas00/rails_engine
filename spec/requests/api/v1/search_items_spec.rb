@@ -78,6 +78,19 @@ RSpec.describe "SearchItems", type: :request do
       expect(parsed_data[:data][:attributes][:name]).to eq("Mermaid tail socks")
     end
 
+    it "wont find an item if the min and max price are out of range" do
+      create(:item, name: "Zebra striped socks", unit_price: 99.99)
+      create(:item, name: "Brown socks", unit_price: 199.99)
+      create(:item, name: "Mermaid tail socks", unit_price: 299.99)
+
+      get "/api/v1/items/find?min_price=399&max_price=499"
+
+      expect(response).to_not be_successful
+      expect(response).to have_http_status(400)
+      parsed_data = JSON.parse(response.body, symbolize_names: true)
+      expect(parsed_data[:errors]).to eq("Item not found")
+    end
+
     it "wont return an item if the either price is less than 0" do
       create(:item, name: "Zebra striped socks", unit_price: 99.99)
       create(:item, name: "Brown socks", unit_price: 199.99)

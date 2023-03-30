@@ -17,7 +17,7 @@ class Api::V1::ItemsController < ApplicationController
     if item.save
       render json: ItemSerializer.new(Item.create!(item_params)), status: :created
     else
-      render json: { errors: "Invalid Item Creation, 1 or more fields is missing or incorrect" }, status: :bad_request
+      render json: ErrorSerializer.new("Invalid Item Creation, 1 or more fields is missing or incorrect", 400).invalid_entry , status: :bad_request
     end
   end
 
@@ -27,7 +27,7 @@ class Api::V1::ItemsController < ApplicationController
     if item.save
       render json: ItemSerializer.new(Item.update(params[:id], item_params))
     else 
-      render json: { errors: "Invalid Update, 1 or more fields is missing or incorrect" }, status: :bad_request
+      render json: ErrorSerializer.new("Invalid Update, 1 or more fields is missing or incorrect", 400).invalid_entry, status: :bad_request
     end
   end
 

@@ -46,8 +46,10 @@ describe "Merchants API" do
     parsed_data = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to have_http_status(404)
-    expect(parsed_data[:error]).to be_an(String)
-    expect(parsed_data[:error]).to eq("Couldn't find Merchant with 'id'=998799558")
+    parsed_data[:errors].each do |error|
+      expect(error[:status]).to eq("404")
+      expect(error[:title]).to eq("Couldn't find Merchant with 'id'=998799558")
+    end
   end
 
   it "can send an error message for a non-existent merchant" do
@@ -58,8 +60,10 @@ describe "Merchants API" do
     parsed_data = JSON.parse(response.body, symbolize_names: true)
 
     expect(response).to have_http_status(404)
-    expect(parsed_data[:error]).to be_an(String)
-    expect(parsed_data[:error]).to eq("Couldn't find Merchant with 'id'=string")
+    parsed_data[:errors].each do |error|
+      expect(error[:status]).to eq("404")
+      expect(error[:title]).to eq("Couldn't find Merchant with 'id'=string")
+    end
   end
 
   it "can get all items for a given merchant ID " do
@@ -98,9 +102,11 @@ describe "Merchants API" do
     
     get "/api/v1/merchants/100000000/items"
     parsed_data = JSON.parse(response.body, symbolize_names: true)
-
+    
     expect(response).to have_http_status(404)
-    expect(parsed_data[:error]).to be_an(String)
-    expect(parsed_data[:error]).to eq("Couldn't find Merchant with 'id'=100000000")
+    parsed_data[:errors].each do |error|
+      expect(error[:status]).to eq("404")
+      expect(error[:title]).to eq("Couldn't find Merchant with 'id'=100000000")
+    end
   end
 end

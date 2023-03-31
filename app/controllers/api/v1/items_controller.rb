@@ -33,6 +33,17 @@ class Api::V1::ItemsController < ApplicationController
 
   def destroy
     item = Item.find(params[:id])
+    item_invoice_delete(item)
+    render json: Item.delete(params[:id]), status: :no_content
+  end
+
+  private
+
+  def item_params
+    params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
+  end
+
+  def item_invoice_delete(item)
     item.invoices.each do |invoice|
       if invoice.has_multiple_items?
         invoice_item = invoice.invoice_items.find_by(item_id: item.id)
@@ -41,12 +52,5 @@ class Api::V1::ItemsController < ApplicationController
         invoice.destroy
       end
     end
-    render json: Item.delete(params[:id]), status: :no_content
-  end
-
-  private
-
-  def item_params
-    params.require(:item).permit(:name, :description, :unit_price, :merchant_id)
   end
 end
